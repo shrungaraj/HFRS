@@ -1,0 +1,38 @@
+.schema-explorer {
+  padding: 1rem;
+}
+
+.schema-explorer-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+
+.schema-table-name {
+  font-family: ui-monospace, 'Cascadia Code', monospace;
+  font-weight: 700;
+  color: #1a6fa8;
+}
+
+.schema-table-meta {
+  font-size: 0.75rem;
+  color: #6a96b5;
+}
+
+.schema-columns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.schema-column {
+  padding: 0.35rem 0.7rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  background: rgba(255, 255, 255, 0.35);
+  color: #2b8fd4;
+  font-family: ui-monospace, 'Cascadia Code', monospace;
+  font-size: 0.78rem;
+  cursor: default;
+}

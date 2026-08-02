@@ -6,7 +6,8 @@ A modern learning management platform with Web3 wallet authentication and a glas
 
 - **Landing page** — ChainCert branding with Web3 wallet login
 - **Dashboard** — Four module tiles after authentication
-- **On chain Data analysis** — First active learning module
+- **Interactive SQL course** — DataCamp / Codecademy style lessons with in-browser SQL
+- **On chain Data analysis** — 3 lessons; Lesson 1 fully interactive
 - **Glass design** — Light blue and white rounded glass aesthetic
 
 ## Getting Started

@@ -1,0 +1,89 @@
+.sql-editor {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.sql-editor-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.45);
+}
+
+.sql-editor-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #5a8fb0;
+}
+
+.sql-editor-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.sql-editor-input {
+  width: 100%;
+  min-height: 140px;
+  padding: 1rem 1.1rem;
+  border: none;
+  resize: vertical;
+  background: rgba(255, 255, 255, 0.18);
+  color: #134f75;
+  font-family: ui-monospace, 'Cascadia Code', 'Fira Code', monospace;
+  font-size: 0.92rem;
+  line-height: 1.6;
+}
+
+.sql-editor-input:focus {
+  outline: none;
+  background: rgba(255, 255, 255, 0.28);
+}
+
+.sql-editor-shortcut {
+  margin: 0;
+  padding: 0.45rem 1rem 0.65rem;
+  font-size: 0.72rem;
+  color: #6a96b5;
+}
+
+.btn-primary,
+.btn-secondary {
+  padding: 0.45rem 0.95rem;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-primary {
+  border: 1px solid rgba(43, 143, 212, 0.35);
+  background: linear-gradient(135deg, #4aa8e8, #2b8fd4);
+  color: white;
+  box-shadow: 0 4px 14px rgba(43, 143, 212, 0.25);
+}
+
+.btn-primary:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(43, 143, 212, 0.32);
+}
+
+.btn-secondary {
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  background: rgba(255, 255, 255, 0.35);
+  color: #1a6fa8;
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.55);
+}
+
+.btn-primary:disabled,
+.btn-secondary:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
