@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom'
 import { useAccount, useConnect, useDisconnect } from 'wagmi'
 import './WalletButton.css'
 
@@ -6,8 +7,15 @@ function truncateAddress(address: string) {
 }
 
 export function WalletButton() {
+  const navigate = useNavigate()
   const { address, isConnected } = useAccount()
-  const { connect, connectors, isPending } = useConnect()
+  const { connect, connectors, isPending } = useConnect({
+    mutation: {
+      onSuccess: () => {
+        navigate('/', { replace: true })
+      },
+    },
+  })
   const { disconnect } = useDisconnect()
 
   if (isConnected && address) {

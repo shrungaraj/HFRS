@@ -18,7 +18,7 @@ export function CoursePage() {
     return (
       <div className="course-page">
         <p>Course not found.</p>
-        <Link to="/dashboard">Back to dashboard</Link>
+        <Link to="/">Back to dashboard</Link>
       </div>
     )
   }
@@ -28,7 +28,7 @@ export function CoursePage() {
       <header className="course-header glass-bar">
         <div className="course-header-left">
           <Logo />
-          <Link className="course-back" to="/dashboard">
+          <Link className="course-back" to="/">
             ← Dashboard
           </Link>
         </div>

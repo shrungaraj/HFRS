@@ -1,30 +1,14 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { CoursePage } from './components/course/CoursePage'
 import { LessonPlayer } from './components/course/LessonPlayer'
-import { Dashboard } from './components/Dashboard'
-import { Landing } from './components/Landing'
-import { ProtectedRoute, PublicOnlyRoute } from './components/ProtectedRoute'
+import { Home } from './components/Home'
+import { ProtectedRoute } from './components/ProtectedRoute'
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route
-          path="/"
-          element={
-            <PublicOnlyRoute>
-              <Landing />
-            </PublicOnlyRoute>
-          }
-        />
-        <Route
-          path="/dashboard"
-          element={
-            <ProtectedRoute>
-              <Dashboard />
-            </ProtectedRoute>
-          }
-        />
+        <Route path="/" element={<Home />} />
         <Route
           path="/course/:courseId"
           element={
@@ -41,6 +25,7 @@ function App() {
             </ProtectedRoute>
           }
         />
+        <Route path="/dashboard" element={<Navigate to="/" replace />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
