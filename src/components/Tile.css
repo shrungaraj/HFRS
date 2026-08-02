@@ -89,6 +89,8 @@ a.tile-link {
   font-size: 0.9rem;
   font-weight: 600;
   cursor: pointer;
+  font-family: inherit;
+  text-align: left;
 }
 
 .tile-action svg {
