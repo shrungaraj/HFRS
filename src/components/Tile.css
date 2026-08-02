@@ -1,0 +1,96 @@
+.tile {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 2rem;
+  min-height: 220px;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.tile--active {
+  cursor: pointer;
+}
+
+.tile--active:hover {
+  transform: translateY(-4px);
+  box-shadow:
+    0 16px 48px rgba(58, 155, 217, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.7);
+}
+
+.tile--soon {
+  opacity: 0.72;
+  cursor: default;
+}
+
+.tile-badge {
+  position: absolute;
+  top: 1.25rem;
+  right: 1.25rem;
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #5a8fb0;
+  background: rgba(255, 255, 255, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+}
+
+.tile-icon {
+  width: 3rem;
+  height: 3rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 1rem;
+  background: rgba(255, 255, 255, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  color: #2b8fd4;
+}
+
+.tile-icon svg {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.tile-title {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #1a5f8a;
+  letter-spacing: -0.01em;
+}
+
+.tile-description {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: #4a7a9b;
+}
+
+.tile-action {
+  margin-top: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0;
+  border: none;
+  background: none;
+  color: #2b8fd4;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.tile-action svg {
+  width: 1rem;
+  height: 1rem;
+  transition: transform 0.2s ease;
+}
+
+.tile--active:hover .tile-action svg {
+  transform: translateX(3px);
+}
