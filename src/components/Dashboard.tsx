@@ -1,4 +1,3 @@
-import { useNavigate } from 'react-router-dom'
 import { onChainDataCourse } from '../course/data/onChainCourse'
 import { Logo } from './Logo'
 import { WalletButton } from './WalletButton'
@@ -38,8 +37,6 @@ const PlaceholderIcon = () => (
 )
 
 export function Dashboard() {
-  const navigate = useNavigate()
-
   return (
     <div className="dashboard">
       <header className="dashboard-header glass-bar">
@@ -58,7 +55,7 @@ export function Dashboard() {
             title="On chain Data analysis"
             description="Write SQL against blockchain data — interactive lessons, no slides."
             icon={<DataAnalysisIcon />}
-            onOpen={() => navigate(`/course/${onChainDataCourse.id}`)}
+            to={`/course/${onChainDataCourse.id}`}
           />
           <Tile title="Module 2" comingSoon icon={<PlaceholderIcon />} />
           <Tile title="Module 3" comingSoon icon={<PlaceholderIcon />} />

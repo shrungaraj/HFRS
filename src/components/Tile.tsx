@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import { Link } from 'react-router-dom'
 import './Tile.css'
 
 type TileProps = {
@@ -6,27 +7,17 @@ type TileProps = {
   description?: string
   comingSoon?: boolean
   icon?: ReactNode
-  onOpen?: () => void
+  to?: string
 }
 
-export function Tile({ title, description, comingSoon = false, icon, onOpen }: TileProps) {
+function TileContent({
+  title,
+  description,
+  comingSoon,
+  icon,
+}: Pick<TileProps, 'title' | 'description' | 'comingSoon' | 'icon'>) {
   return (
-    <article
-      className={`tile glass-card ${comingSoon ? 'tile--soon' : 'tile--active'}`}
-      onClick={!comingSoon ? onOpen : undefined}
-      onKeyDown={
-        !comingSoon && onOpen
-          ? (e) => {
-              if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault()
-                onOpen()
-              }
-            }
-          : undefined
-      }
-      role={!comingSoon ? 'button' : undefined}
-      tabIndex={!comingSoon ? 0 : undefined}
-    >
+    <>
       {comingSoon && <span className="tile-badge">Coming Soon</span>}
 
       <div className="tile-icon">{icon}</div>
@@ -49,6 +40,27 @@ export function Tile({ title, description, comingSoon = false, icon, onOpen }: T
           </svg>
         </span>
       )}
-    </article>
+    </>
+  )
+}
+
+export function Tile({ title, description, comingSoon = false, icon, to }: TileProps) {
+  if (comingSoon || !to) {
+    return (
+      <article className="tile glass-card tile--soon">
+        <TileContent
+          title={title}
+          description={description}
+          comingSoon={comingSoon}
+          icon={icon}
+        />
+      </article>
+    )
+  }
+
+  return (
+    <Link to={to} className="tile glass-card tile--active tile-link">
+      <TileContent title={title} description={description} icon={icon} />
+    </Link>
   )
 }
