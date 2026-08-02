@@ -1,0 +1,73 @@
+.wallet-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.wallet-address {
+  font-family: ui-monospace, 'Cascadia Code', monospace;
+  font-size: 0.875rem;
+  color: #1a6fa8;
+}
+
+.btn-glass {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  padding: 0.85rem 1.6rem;
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.35);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  color: #1a6fa8;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  box-shadow:
+    0 4px 24px rgba(58, 155, 217, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6);
+}
+
+.btn-glass:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.55);
+  transform: translateY(-1px);
+  box-shadow:
+    0 8px 32px rgba(58, 155, 217, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.7);
+}
+
+.btn-glass:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.btn-glass:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.btn-connect {
+  font-size: 1.05rem;
+  padding: 1rem 2rem;
+}
+
+.btn-disconnect {
+  padding: 0.6rem 1.2rem;
+  font-size: 0.875rem;
+}
+
+.wallet-icon {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.glass-pill {
+  padding: 0.55rem 1rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  background: rgba(255, 255, 255, 0.3);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
