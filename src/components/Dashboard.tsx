@@ -1,3 +1,4 @@
+import { onChainDataCourse } from '../course/data/onChainCourse'
 import { Logo } from './Logo'
 import { WalletButton } from './WalletButton'
 import { Tile } from './Tile'
@@ -52,8 +53,9 @@ export function Dashboard() {
         <div className="tile-grid">
           <Tile
             title="On chain Data analysis"
-            description="Explore blockchain data patterns, metrics, and analytics fundamentals."
+            description="Write SQL against blockchain data — interactive lessons, no slides."
             icon={<DataAnalysisIcon />}
+            to={`/course/${onChainDataCourse.id}`}
           />
           <Tile title="Module 2" comingSoon icon={<PlaceholderIcon />} />
           <Tile title="Module 3" comingSoon icon={<PlaceholderIcon />} />

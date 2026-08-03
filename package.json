@@ -11,8 +11,10 @@
   },
   "dependencies": {
     "@tanstack/react-query": "^5.101.4",
+    "alasql": "^4.17.3",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
+    "react-router-dom": "^7.18.2",
     "viem": "^2.55.10",
     "wagmi": "^3.7.5"
   },

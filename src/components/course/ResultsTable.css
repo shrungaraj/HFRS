@@ -1,0 +1,63 @@
+.results-table {
+  display: flex;
+  flex-direction: column;
+  min-height: 120px;
+  overflow: hidden;
+}
+
+.results-table--empty,
+.results-table--error {
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  color: #5a8fb0;
+  font-size: 0.9rem;
+}
+
+.results-table--error {
+  color: #c0392b;
+  background: rgba(255, 235, 235, 0.35);
+}
+
+.results-table-header {
+  padding: 0.65rem 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.45);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #5a8fb0;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.results-table-scroll {
+  overflow: auto;
+}
+
+.results-table table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+.results-table th,
+.results-table td {
+  padding: 0.6rem 0.9rem;
+  text-align: left;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.35);
+  white-space: nowrap;
+}
+
+.results-table th {
+  background: rgba(255, 255, 255, 0.25);
+  color: #1a6fa8;
+  font-weight: 600;
+}
+
+.results-table td {
+  font-family: ui-monospace, 'Cascadia Code', monospace;
+  color: #2d6f96;
+}
+
+.results-table tbody tr:hover {
+  background: rgba(255, 255, 255, 0.18);
+}
