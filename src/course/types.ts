@@ -7,6 +7,7 @@ export type QueryResult = {
 export type ValidationResult = {
   passed: boolean
   message: string
+  insight?: string
 }
 
 export type CourseStep = {
@@ -15,6 +16,7 @@ export type CourseStep = {
   prompt: string
   hint: string
   starterSql: string
+  editorNote?: string
   validate: (sql: string, result: QueryResult) => ValidationResult
 }
 

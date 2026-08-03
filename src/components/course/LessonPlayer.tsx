@@ -80,7 +80,12 @@ export function LessonPlayer() {
 
     const validation = step.validate(sql, queryResult)
     if (validation.passed) {
-      setFeedback({ type: 'success', text: validation.message })
+      setFeedback({
+        type: 'success',
+        text: validation.insight
+          ? `${validation.message} ${validation.insight}`
+          : validation.message,
+      })
       setCompleted(true)
       if (lessonId) saveProgress(lessonId, stepIndex + 1)
     } else {
@@ -161,6 +166,7 @@ export function LessonPlayer() {
             onChange={setSql}
             onRun={handleRun}
             onCheck={handleCheck}
+            note={step.editorNote}
           />
           <ResultsTable result={result} />
         </section>

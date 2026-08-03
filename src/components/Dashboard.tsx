@@ -53,7 +53,7 @@ export function Dashboard() {
         <div className="tile-grid">
           <Tile
             title="On chain Data analysis"
-            description="Write SQL against blockchain data — interactive lessons, no slides."
+            description="Find wallets that trade frequently, with size, and aren't bots or exchanges."
             icon={<DataAnalysisIcon />}
             to={`/course/${onChainDataCourse.id}`}
           />

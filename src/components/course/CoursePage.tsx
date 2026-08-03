@@ -38,7 +38,7 @@ export function CoursePage() {
       <main className="course-main">
         <div className="course-hero">
           <h1>{course.title}</h1>
-          <p>3 beginner-friendly lessons · write SQL inside each step</p>
+          <p>Practical on-chain SQL — find smart money, track flows, spot early tokens</p>
         </div>
 
         <div className="lesson-list">
