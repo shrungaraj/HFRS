@@ -11,6 +11,28 @@ function ensureDatabase() {
   initialized = true
 }
 
+function friendlySqlError(sql: string, message: string): string {
+  const trimmed = sql.trim()
+
+  if (/limit\s*$/i.test(trimmed) || /expecting 'NUMBER'/i.test(message)) {
+    return 'Add a number after LIMIT — for this step, type 3.'
+  }
+
+  if (/select\s*$/i.test(trimmed) || /select\s+\n\s*from/i.test(trimmed)) {
+    return 'Add column names after SELECT, or use * to select all columns.'
+  }
+
+  if (/where\s*$/i.test(trimmed)) {
+    return 'Add a condition after WHERE — e.g. amount > 1'
+  }
+
+  if (/,\s*$/m.test(trimmed) || message.includes('Parse error')) {
+    return 'Your query looks incomplete. Finish each line, then Run again.'
+  }
+
+  return message
+}
+
 export function runQuery(sql: string): QueryResult {
   ensureDatabase()
 
@@ -34,7 +56,7 @@ export function runQuery(sql: string): QueryResult {
     return { columns, rows }
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Query failed.'
-    return { columns: [], rows: [], error: message }
+    return { columns: [], rows: [], error: friendlySqlError(trimmed, message) }
   }
 }
 

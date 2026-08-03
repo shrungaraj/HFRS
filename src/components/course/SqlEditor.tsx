@@ -6,10 +6,11 @@ type SqlEditorProps = {
   onChange: (value: string) => void
   onRun: () => void
   onCheck: () => void
+  note?: string
   disabled?: boolean
 }
 
-export function SqlEditor({ value, onChange, onRun, onCheck, disabled }: SqlEditorProps) {
+export function SqlEditor({ value, onChange, onRun, onCheck, note, disabled }: SqlEditorProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
   useEffect(() => {
@@ -46,7 +47,9 @@ export function SqlEditor({ value, onChange, onRun, onCheck, disabled }: SqlEdit
         onKeyDown={handleKeyDown}
         aria-label="SQL query editor"
       />
-      <p className="sql-editor-shortcut">Ctrl + Enter to run</p>
+      <p className="sql-editor-shortcut">
+        {note ? note : 'Ctrl + Enter to run'}
+      </p>
     </div>
   )
 }

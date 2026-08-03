@@ -15,6 +15,7 @@ export type CourseStep = {
   prompt: string
   hint: string
   starterSql: string
+  editorNote?: string
   validate: (sql: string, result: QueryResult) => ValidationResult
 }
 

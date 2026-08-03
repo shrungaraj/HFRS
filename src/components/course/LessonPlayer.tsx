@@ -161,6 +161,7 @@ export function LessonPlayer() {
             onChange={setSql}
             onRun={handleRun}
             onCheck={handleCheck}
+            note={step.editorNote}
           />
           <ResultsTable result={result} />
         </section>

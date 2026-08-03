@@ -28,9 +28,10 @@ export const onChainDataCourse: Course = {
         {
           id: 'on-chain-data',
           concept: 'On-chain data',
-          prompt: 'Every transaction is a row in a table. Pull the first 3 rows.',
+          prompt: 'Every transaction is a row in a table. Complete the query to pull the first 3 rows.',
           hint: 'Use SELECT * with LIMIT 3.',
           starterSql: 'SELECT * FROM transactions\nLIMIT ',
+          editorNote: 'Type 3 after LIMIT, then press Run.',
           validate: validateLimitThree,
         },
         {
@@ -39,6 +40,7 @@ export const onChainDataCourse: Course = {
           prompt: 'Tables have named columns. Return only sender and amount.',
           hint: 'List column names after SELECT.',
           starterSql: 'SELECT \nFROM transactions',
+          editorNote: 'Add sender, amount after SELECT.',
           validate: validateSelectColumns,
         },
         {
@@ -47,6 +49,7 @@ export const onChainDataCourse: Course = {
           prompt: 'Filter to transactions where amount is greater than 1.',
           hint: 'Add WHERE amount > 1.',
           starterSql: 'SELECT *\nFROM transactions\n',
+          editorNote: 'Add WHERE amount > 1 on the last line.',
           validate: validateFilterAmount,
         },
         {
@@ -55,6 +58,7 @@ export const onChainDataCourse: Course = {
           prompt: 'How many transactions are in the table?',
           hint: 'COUNT(*) returns the total number of rows.',
           starterSql: 'SELECT \nFROM transactions',
+          editorNote: 'Try COUNT(*) between SELECT and FROM.',
           validate: validateCountAll,
         },
         {
@@ -63,6 +67,7 @@ export const onChainDataCourse: Course = {
           prompt: 'Count how many transactions happened on each day.',
           hint: 'SELECT date, COUNT(*) … GROUP BY date',
           starterSql: 'SELECT date,\nFROM transactions\n',
+          editorNote: 'Add COUNT(*) after the comma, then GROUP BY date.',
           validate: validateGroupByDate,
         },
       ],
