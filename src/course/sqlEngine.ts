@@ -1,13 +1,15 @@
 import alasql from 'alasql'
-import { transactions } from './data/transactions'
+import { trades, walletLabels } from './data/smartMoney'
 import type { QueryResult } from './types'
 
 let initialized = false
 
 function ensureDatabase() {
   if (initialized) return
-  alasql('CREATE TABLE transactions')
-  alasql.tables.transactions.data = transactions.map((tx) => ({ ...tx }))
+  alasql('CREATE TABLE trades')
+  alasql('CREATE TABLE wallet_labels')
+  alasql.tables.trades.data = trades.map((t) => ({ ...t }))
+  alasql.tables.wallet_labels.data = walletLabels.map((w) => ({ ...w }))
   initialized = true
 }
 
@@ -15,15 +17,19 @@ function friendlySqlError(sql: string, message: string): string {
   const trimmed = sql.trim()
 
   if (/limit\s*$/i.test(trimmed) || /expecting 'NUMBER'/i.test(message)) {
-    return 'Add a number after LIMIT — e.g. LIMIT 3 or LIMIT 1.'
-  }
-
-  if (/select\s*$/i.test(trimmed) || /select\s+\n\s*from/i.test(trimmed)) {
-    return 'Add column names after SELECT, or use * to select all columns.'
+    return 'Add a number after LIMIT.'
   }
 
   if (/where\s*$/i.test(trimmed)) {
-    return 'Add a condition after WHERE — e.g. amount > 1'
+    return 'Add a condition after WHERE.'
+  }
+
+  if (/having\s*$/i.test(trimmed)) {
+    return 'Add a condition after HAVING — e.g. HAVING COUNT(*) >= 5'
+  }
+
+  if (/join\s*$/i.test(trimmed) || /on\s*$/i.test(trimmed)) {
+    return 'Complete the JOIN … ON … clause.'
   }
 
   if (/,\s*$/m.test(trimmed) || message.includes('Parse error')) {
