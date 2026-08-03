@@ -38,7 +38,7 @@ export function CoursePage() {
       <main className="course-main">
         <div className="course-hero">
           <h1>{course.title}</h1>
-          <p>Practical on-chain SQL — volume leaders, smart money, early tokens</p>
+          <p>Dune SQL on dex.trades — same queries you'd run on dune.com</p>
         </div>
 
         <div className="lesson-list">

@@ -53,7 +53,7 @@ export function Dashboard() {
         <div className="tile-grid">
           <Tile
             title="On chain Data analysis"
-            description="Find top altcoins by 4h volume — exclude stables and blue chips."
+            description="Learn production Dune SQL on dex.trades — top altcoins by 4h volume."
             icon={<DataAnalysisIcon />}
             to={`/course/${onChainDataCourse.id}`}
           />

@@ -42,3 +42,27 @@
   font-size: 0.78rem;
   cursor: default;
 }
+
+.schema-column--partition {
+  border-color: rgba(43, 143, 212, 0.55);
+  background: rgba(43, 143, 212, 0.15);
+  color: #1a6fa8;
+  font-weight: 600;
+}
+
+.schema-partition-note {
+  margin: 0 0 0.75rem;
+  font-size: 0.78rem;
+  color: #4a7a9b;
+  line-height: 1.5;
+}
+
+.schema-partition-note code {
+  margin: 0 0.15rem;
+  padding: 0.1rem 0.35rem;
+  border-radius: 0.35rem;
+  background: rgba(43, 143, 212, 0.12);
+  font-family: ui-monospace, 'Cascadia Code', monospace;
+  font-size: 0.72rem;
+  color: #1a6fa8;
+}

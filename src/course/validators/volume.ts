@@ -2,7 +2,6 @@ import type { QueryResult, ValidationResult } from '../types'
 import {
   CAPSTONE_LIMIT,
   EXCLUDED_TOKENS,
-  WINDOW_START,
   topTokensByVolume,
   tradesInWindow,
   tradesInWindowExcludingMajors,
@@ -36,23 +35,32 @@ function findTokenColumn(result: QueryResult) {
   })
 }
 
-export function validateLastFourHours(sql: string, result: QueryResult): ValidationResult {
+function hasDuneTable(sql: string) {
+  const n = normalizeSql(sql)
+  return n.includes('dex.trades') || n.includes('dex_trades')
+}
+
+function hasPartitionFilters(sql: string) {
+  const n = normalizeSql(sql)
+  return n.includes('blockchain') && n.includes('block_month')
+}
+
+export function validateDunePartitions(sql: string, result: QueryResult): ValidationResult {
   const err = hasError(result)
   if (err) return err
-  const normalized = normalizeSql(sql)
-  if (!normalized.includes('block_time')) return fail('Filter on block_time for the 4-hour window.')
-  if (!normalized.includes('dex.trades') && !normalized.includes('dex_trades')) {
-    return fail('Query dex.trades — the DEX trades table.')
+  if (!hasDuneTable(sql)) return fail('Query dex.trades on Dune.')
+  if (!hasPartitionFilters(sql)) {
+    return fail("Always filter blockchain and block_month — Dune's partition keys.")
   }
-  if (!normalized.includes('where')) return fail('Use WHERE block_time >= TIMESTAMP …')
+  if (!normalizeSql(sql).includes('block_time')) return fail('Add a block_time filter for the 4h window.')
 
   const expected = tradesInWindow()
   if (result.rows.length !== expected.length) {
-    return fail(`Expected ${expected.length} trades since ${WINDOW_START}.`)
+    return fail(`Expected ${expected.length} trades in the 4-hour window.`)
   }
   return pass(
-    'Window set.',
-    `${expected.length} DEX trades in the last 4 hours — stables and blue chips dominate raw volume.`,
+    'Dune filters set.',
+    'On Dune, always lead with blockchain + block_month — it keeps queries fast and cheap.',
   )
 }
 
@@ -60,19 +68,16 @@ export function validateExcludeMajors(sql: string, result: QueryResult): Validat
   const err = hasError(result)
   if (err) return err
   const normalized = normalizeSql(sql)
-  if (!normalized.includes('token_bought_symbol')) {
-    return fail('Filter on token_bought_symbol.')
-  }
-  if (!normalized.includes('not in')) return fail('Exclude majors with NOT IN (…).')
+  if (!hasPartitionFilters(sql)) return fail('Keep blockchain and block_month filters.')
+  if (!normalized.includes('token_bought_symbol')) return fail('Filter token_bought_symbol.')
+  if (!normalized.includes('not in')) return fail("Exclude majors: NOT IN ('USDC', 'USDT', …).")
 
   const tokenIdx = findTokenColumn(result)
-  if (tokenIdx === -1) return fail('Return token_bought_symbol (or alias token).')
+  if (tokenIdx === -1) return fail('Return token_bought_symbol.')
 
   const tokens = result.rows.map((row) => String(row[tokenIdx]).toUpperCase())
   for (const excluded of EXCLUDED_TOKENS) {
-    if (tokens.includes(excluded)) {
-      return fail(`${excluded} should be excluded.`)
-    }
+    if (tokens.includes(excluded)) return fail(`${excluded} should be excluded.`)
   }
 
   const expected = tradesInWindowExcludingMajors()
@@ -80,8 +85,8 @@ export function validateExcludeMajors(sql: string, result: QueryResult): Validat
     return fail(`Expected ${expected.length} altcoin trades after exclusions.`)
   }
   return pass(
-    'Majors stripped out.',
-    'USDC, USDT, BTC, ETH, XRP & SOL removed — now alt volume is visible.',
+    'Majors excluded.',
+    'USDC, USDT, BTC, ETH, XRP & SOL stripped — alt volume is now visible.',
   )
 }
 
@@ -90,8 +95,8 @@ export function validateRankByVolume(sql: string, result: QueryResult): Validati
   if (err) return err
   const normalized = normalizeSql(sql)
   if (!normalized.includes('group by')) return fail('GROUP BY token_bought_symbol.')
-  if (!normalized.includes('sum')) return fail('SUM(amount_usd) as total_volume_usd.')
-  if (!normalized.includes('order by')) return fail('ORDER BY total_volume_usd DESC.')
+  if (!normalized.includes('sum(amount_usd)')) return fail('Use sum(amount_usd) as total_volume_usd.')
+  if (!normalized.includes('order by')) return fail('ORDER BY total_volume_usd desc.')
 
   const tokenIdx = findTokenColumn(result)
   const volIdx = findVolumeColumn(result)
@@ -109,7 +114,7 @@ export function validateRankByVolume(sql: string, result: QueryResult): Validati
 
   return pass(
     'Volume ranked.',
-    `${expected[0].token} leads at $${(expected[0].total_volume_usd / 1_000_000).toFixed(2)}M — that's the rotation.`,
+    `${expected[0].token} leads — this is the query structure you'd paste into Dune.`,
   )
 }
 
@@ -117,15 +122,15 @@ export function validateTopCoinsCapstone(sql: string, result: QueryResult): Vali
   const err = hasError(result)
   if (err) return err
   const normalized = normalizeSql(sql)
-  if (!normalized.includes('dex.trades') && !normalized.includes('dex_trades')) {
-    return fail('Query from dex.trades.')
-  }
-  if (!normalized.includes('block_time')) return fail('Filter block_time >= TIMESTAMP …')
+  if (!hasDuneTable(sql)) return fail('Query from dex.trades.')
+  if (!hasPartitionFilters(sql)) return fail('Include blockchain and block_month filters.')
+  if (!normalized.includes('block_time')) return fail('Filter block_time for the last 4 hours.')
+  if (!normalized.includes('interval')) return fail("Use now() - interval '4' hour for the time window.")
   if (!normalized.includes('token_bought_symbol')) return fail('Use token_bought_symbol.')
   if (!normalized.includes('not in')) return fail('Exclude USDC, USDT, BTC, ETH, XRP, SOL.')
   if (!normalized.includes('group by')) return fail('GROUP BY token_bought_symbol.')
-  if (!normalized.includes('order by')) return fail('ORDER BY total_volume_usd DESC.')
-  if (!/limit\s+10\b/i.test(normalized)) return fail('LIMIT 10 for the top 10 coins.')
+  if (!normalized.includes('order by')) return fail('ORDER BY total_volume_usd desc.')
+  if (!/limit\s+10\b/i.test(normalized)) return fail('LIMIT 10.')
 
   const expected = topTokensByVolume(CAPSTONE_LIMIT)
   const tokenIdx = findTokenColumn(result)
@@ -149,7 +154,7 @@ export function validateTopCoinsCapstone(sql: string, result: QueryResult): Vali
 
   const leader = expected[0]
   return pass(
-    'Top 10 altcoins found!',
-    `${leader.token} is #1 at $${(leader.total_volume_usd / 1_000_000).toFixed(2)}M in 4h — production Dune query, same logic.`,
+    'Ready for Dune!',
+    `${leader.token} is #1 at $${(leader.total_volume_usd / 1_000_000).toFixed(2)}M — copy this query straight to dune.com.`,
   )
 }

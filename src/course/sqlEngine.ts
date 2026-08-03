@@ -1,5 +1,5 @@
 import alasql from 'alasql'
-import { dexTrades } from './data/dexTrades'
+import { BLOCKCHAIN, WINDOW_START, dexTrades } from './data/dexTrades'
 import type { QueryResult } from './types'
 
 const INTERNAL_TABLE = 'dex_trades'
@@ -13,11 +13,22 @@ function ensureDatabase() {
   initialized = true
 }
 
-/** Adapt Dune-style SQL for the in-browser engine. */
+/**
+ * Translate Dune SQL (Trino/Spark dialect) into AlaSQL the browser can run.
+ * Keeps the course editor identical to what learners paste into dune.com.
+ */
 export function preprocessSql(sql: string): string {
-  return sql
-    .replace(/\bdex\.trades\b/gi, INTERNAL_TABLE)
-    .replace(/TIMESTAMP\s+'([^']+)'/gi, "'$1'")
+  let q = sql
+
+  q = q.replace(/\bdex\.trades\b/gi, INTERNAL_TABLE)
+  q = q.replace(/\bdate\s+'([^']+)'/gi, "'$1'")
+  q = q.replace(/\btimestamp\s+'([^']+)'/gi, "'$1'")
+  q = q.replace(/\bnow\s*\(\s*\)\s*-\s*interval\s+'4'\s*hour/gi, `'` + WINDOW_START + `'`)
+  q = q.replace(/\bnow\s*\(\s*\)\s*-\s*interval\s+'4'\s*hours/gi, `'` + WINDOW_START + `'`)
+  q = q.replace(new RegExp(`blockchain\\s*=\\s*'${BLOCKCHAIN}'`, 'gi'), '1=1')
+  q = q.replace(/block_month\s*>=\s*'[^']+'/gi, '1=1')
+
+  return q
 }
 
 function friendlySqlError(sql: string, message: string): string {
@@ -28,11 +39,11 @@ function friendlySqlError(sql: string, message: string): string {
   }
 
   if (/where\s*$/i.test(trimmed)) {
-    return 'Add a condition after WHERE.'
+    return 'Add Dune partition filters: blockchain, block_month, block_time.'
   }
 
   if (/not in\s*\(\s*\)/i.test(trimmed) || /not in\s*$/i.test(trimmed)) {
-    return 'List tokens to exclude inside NOT IN (…).'
+    return "List tokens inside NOT IN ('USDC', 'USDT', …)."
   }
 
   if (/,\s*$/m.test(trimmed) || message.includes('Parse error')) {
