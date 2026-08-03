@@ -1,15 +1,13 @@
 import alasql from 'alasql'
-import { trades, walletLabels } from './data/smartMoney'
+import { swaps } from './data/volumeSwaps'
 import type { QueryResult } from './types'
 
 let initialized = false
 
 function ensureDatabase() {
   if (initialized) return
-  alasql('CREATE TABLE trades')
-  alasql('CREATE TABLE wallet_labels')
-  alasql.tables.trades.data = trades.map((t) => ({ ...t }))
-  alasql.tables.wallet_labels.data = walletLabels.map((w) => ({ ...w }))
+  alasql('CREATE TABLE swaps')
+  alasql.tables.swaps.data = swaps.map((s) => ({ ...s }))
   initialized = true
 }
 
@@ -24,12 +22,8 @@ function friendlySqlError(sql: string, message: string): string {
     return 'Add a condition after WHERE.'
   }
 
-  if (/having\s*$/i.test(trimmed)) {
-    return 'Add a condition after HAVING — e.g. HAVING COUNT(*) >= 5'
-  }
-
-  if (/join\s*$/i.test(trimmed) || /on\s*$/i.test(trimmed)) {
-    return 'Complete the JOIN … ON … clause.'
+  if (/not in\s*\(\s*\)/i.test(trimmed) || /not in\s*$/i.test(trimmed)) {
+    return 'List tokens to exclude inside NOT IN (…).'
   }
 
   if (/,\s*$/m.test(trimmed) || message.includes('Parse error')) {

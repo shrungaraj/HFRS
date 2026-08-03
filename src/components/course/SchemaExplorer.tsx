@@ -1,4 +1,4 @@
-import { courseTables } from '../../course/data/smartMoney'
+import { courseTables } from '../../course/data/volumeSwaps'
 import './SchemaExplorer.css'
 
 export function SchemaExplorer() {

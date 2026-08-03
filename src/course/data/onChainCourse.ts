@@ -1,11 +1,13 @@
 import type { Course } from '../types'
 import {
-  validateExcludeBotsExchanges,
-  validateFrequentTraders,
-  validateMeaningfulSize,
-  validateSmartMoneyCapstone,
-} from '../validators/smartMoney'
-import { SMART_MONEY_MIN_SIZE_ETH, SMART_MONEY_MIN_TRADES } from './smartMoney'
+  validateExcludeMajors,
+  validateLastFourHours,
+  validateRankByVolume,
+  validateTopCoinsCapstone,
+} from '../validators/volume'
+import { EXCLUDED_TOKENS, WINDOW_START } from './volumeSwaps'
+
+const excludedList = EXCLUDED_TOKENS.map((t) => `'${t}'`).join(', ')
 
 export const onChainDataCourse: Course = {
   id: 'on-chain-data-analysis',
@@ -13,75 +15,70 @@ export const onChainDataCourse: Course = {
   lessons: [
     {
       id: 'lesson-1',
-      title: 'Find Smart Money',
+      title: 'Top Coins by 4h Volume',
       objective:
-        'Identify wallets that trade frequently, trade meaningful size, and are not bots or exchanges.',
-      concepts: [
-        'Size filtering',
-        'Trade frequency',
-        'HAVING',
-        'JOIN labels',
-        'Smart money',
-      ],
+        'Find the highest-volume altcoins in the last 4 hours, excluding stables and blue chips.',
+      concepts: ['Time filters', 'Exclusions', 'SUM', 'GROUP BY', 'ORDER BY'],
       available: true,
       steps: [
         {
-          id: 'explore-trades',
-          concept: 'On-chain trades',
+          id: 'four-hour-window',
+          concept: '4h window',
           prompt:
-            'You have a DEX trades table. Pull wallet_address, amount_eth, and token for every trade ≥ 1.5 ETH.',
-          hint: `SELECT wallet_address, amount_eth, token FROM trades WHERE amount_eth >= ${SMART_MONEY_MIN_SIZE_ETH}`,
-          starterSql: 'SELECT wallet_address, amount_eth, token\nFROM trades\nWHERE ',
-          editorNote: `Filter amount_eth >= ${SMART_MONEY_MIN_SIZE_ETH}`,
-          validate: validateMeaningfulSize,
+            'DEX volume just spiked. Pull every swap from the last 4 hours — use swapped_at >= the window start.',
+          hint: `SELECT token, volume_usd, swapped_at FROM swaps WHERE swapped_at >= '${WINDOW_START}'`,
+          starterSql: 'SELECT token, volume_usd, swapped_at\nFROM swaps\nWHERE swapped_at >= ',
+          editorNote: `'${WINDOW_START}'`,
+          validate: validateLastFourHours,
         },
         {
-          id: 'frequent-traders',
-          concept: 'Trade frequency',
-          prompt: `Smart money trades often. Which wallets have at least ${SMART_MONEY_MIN_TRADES} trades? Return wallet_address and trade_count.`,
-          hint: `SELECT wallet_address, COUNT(*) AS trade_count FROM trades GROUP BY wallet_address HAVING COUNT(*) >= ${SMART_MONEY_MIN_TRADES}`,
-          starterSql: 'SELECT wallet_address, COUNT(*) AS trade_count\nFROM trades\nGROUP BY wallet_address\n',
-          editorNote: `Add HAVING COUNT(*) >= ${SMART_MONEY_MIN_TRADES}`,
-          validate: validateFrequentTraders,
-        },
-        {
-          id: 'exclude-noise',
-          concept: 'Exclude bots & exchanges',
+          id: 'exclude-majors',
+          concept: 'Exclude majors',
           prompt:
-            'Remove noise. JOIN wallet_labels and return only wallets that are NOT tagged exchange or bot.',
-          hint: "SELECT DISTINCT t.wallet_address, w.label FROM trades t LEFT JOIN wallet_labels w ON t.wallet_address = w.wallet_address WHERE w.label IS NULL OR w.label NOT IN ('exchange', 'bot')",
+            'Strip the noise. Keep only swaps from the last 4 hours that are NOT USDC, USDT, BTC, ETH, XRP, or SOL.',
+          hint: `WHERE swapped_at >= '${WINDOW_START}' AND token NOT IN (${excludedList})`,
           starterSql:
-            'SELECT DISTINCT t.wallet_address, w.label\nFROM trades t\nLEFT JOIN wallet_labels w ON t.wallet_address = w.wallet_address\nWHERE ',
-          editorNote: "Filter: label IS NULL OR label NOT IN ('exchange', 'bot')",
-          validate: validateExcludeBotsExchanges,
+            "SELECT token, volume_usd, swapped_at\nFROM swaps\nWHERE swapped_at >= '2026-01-18 10:00:00'\n  AND token NOT IN (",
+          editorNote: `${excludedList})`,
+          validate: validateExcludeMajors,
         },
         {
-          id: 'smart-money-capstone',
-          concept: 'Smart Money',
+          id: 'rank-volume',
+          concept: 'Rank by volume',
           prompt:
-            'Combine everything: find smart money wallets — ≥ 1.5 ETH per trade, ≥ 5 trades total, not an exchange or bot.',
-          hint: 'JOIN wallet_labels, filter size in WHERE, use GROUP BY + HAVING for frequency, exclude exchange/bot labels',
+            'Which alts are moving? Rank tokens by total volume_usd in the last 4 hours (majors already excluded).',
+          hint: 'SELECT token, SUM(volume_usd) AS total_volume_usd … GROUP BY token ORDER BY total_volume_usd DESC',
           starterSql:
-            'SELECT t.wallet_address, COUNT(*) AS trade_count\nFROM trades t\nLEFT JOIN wallet_labels w ON t.wallet_address = w.wallet_address\nWHERE ',
-          editorNote:
-            'Add amount_eth filter, exclude exchange/bot, GROUP BY wallet_address, HAVING COUNT(*) >= 5',
-          validate: validateSmartMoneyCapstone,
+            "SELECT token, SUM(volume_usd) AS total_volume_usd\nFROM swaps\nWHERE swapped_at >= '2026-01-18 10:00:00'\n  AND token NOT IN ('USDC', 'USDT', 'BTC', 'ETH', 'XRP', 'SOL')\nGROUP BY token\nORDER BY total_volume_usd DESC",
+          editorNote: 'Run to see ranked altcoins by 4h volume.',
+          validate: validateRankByVolume,
+        },
+        {
+          id: 'top-coins-capstone',
+          concept: 'Top coins',
+          prompt:
+            'Give me the top 5 coins by 4h volume. Exclude USDC, USDT, BTC, ETH, XRP & SOL. Highest volume first.',
+          hint: 'Combine time filter + NOT IN + GROUP BY + ORDER BY DESC + LIMIT 5',
+          starterSql:
+            "SELECT token, SUM(volume_usd) AS total_volume_usd\nFROM swaps\nWHERE swapped_at >= '2026-01-18 10:00:00'\n  AND token NOT IN ('USDC', 'USDT', 'BTC', 'ETH', 'XRP', 'SOL')\nGROUP BY token\nORDER BY total_volume_usd DESC\nLIMIT ",
+          editorNote: 'Type 5 after LIMIT.',
+          validate: validateTopCoinsCapstone,
         },
       ],
     },
     {
       id: 'lesson-2',
-      title: 'Track Smart Money Flows',
-      objective: 'Follow where smart money wallets send capital after they accumulate.',
-      concepts: ['Window functions', 'Flow analysis', 'Net inflows'],
+      title: 'Find Smart Money',
+      objective: 'Identify wallets that trade frequently, with size, and are not bots or exchanges.',
+      concepts: ['HAVING', 'JOIN labels', 'Wallet filtering'],
       available: false,
       steps: [],
     },
     {
       id: 'lesson-3',
       title: 'Early Token Discovery',
-      objective: 'Spot tokens smart money buys before they trend on social.',
-      concepts: ['First buyers', 'Token age', 'Concentration'],
+      objective: 'Spot tokens gaining volume before they trend on social.',
+      concepts: ['Volume spikes', 'Token age', 'Momentum'],
       available: false,
       steps: [],
     },
