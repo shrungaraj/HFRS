@@ -7,6 +7,7 @@ export type QueryResult = {
 export type ValidationResult = {
   passed: boolean
   message: string
+  insight?: string
 }
 
 export type CourseStep = {

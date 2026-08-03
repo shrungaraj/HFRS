@@ -15,7 +15,7 @@ function friendlySqlError(sql: string, message: string): string {
   const trimmed = sql.trim()
 
   if (/limit\s*$/i.test(trimmed) || /expecting 'NUMBER'/i.test(message)) {
-    return 'Add a number after LIMIT — for this step, type 3.'
+    return 'Add a number after LIMIT — e.g. LIMIT 3 or LIMIT 1.'
   }
 
   if (/select\s*$/i.test(trimmed) || /select\s+\n\s*from/i.test(trimmed)) {

@@ -38,7 +38,7 @@ export function CoursePage() {
       <main className="course-main">
         <div className="course-hero">
           <h1>{course.title}</h1>
-          <p>3 beginner-friendly lessons · write SQL inside each step</p>
+          <p>3 beginner-friendly lessons · query real-style on-chain data with SQL</p>
         </div>
 
         <div className="lesson-list">
