@@ -1,11 +1,12 @@
 import type { QueryResult, ValidationResult } from '../types'
 import {
+  CAPSTONE_LIMIT,
   EXCLUDED_TOKENS,
   WINDOW_START,
-  swapsInWindow,
-  swapsInWindowExcludingMajors,
   topTokensByVolume,
-} from '../data/volumeSwaps'
+  tradesInWindow,
+  tradesInWindowExcludingMajors,
+} from '../data/dexTrades'
 
 function fail(message: string): ValidationResult {
   return { passed: false, message }
@@ -29,23 +30,29 @@ function findVolumeColumn(result: QueryResult) {
 }
 
 function findTokenColumn(result: QueryResult) {
-  return result.columns.findIndex((c) => c.toLowerCase() === 'token')
+  return result.columns.findIndex((c) => {
+    const col = c.toLowerCase()
+    return col === 'token' || col === 'token_bought_symbol'
+  })
 }
 
 export function validateLastFourHours(sql: string, result: QueryResult): ValidationResult {
   const err = hasError(result)
   if (err) return err
   const normalized = normalizeSql(sql)
-  if (!normalized.includes('swapped_at')) return fail('Filter on swapped_at for the time window.')
-  if (!normalized.includes('where')) return fail('Use WHERE to limit to the last 4 hours.')
+  if (!normalized.includes('block_time')) return fail('Filter on block_time for the 4-hour window.')
+  if (!normalized.includes('dex.trades') && !normalized.includes('dex_trades')) {
+    return fail('Query dex.trades — the DEX trades table.')
+  }
+  if (!normalized.includes('where')) return fail('Use WHERE block_time >= TIMESTAMP …')
 
-  const expected = swapsInWindow()
+  const expected = tradesInWindow()
   if (result.rows.length !== expected.length) {
-    return fail(`Expected ${expected.length} swaps since ${WINDOW_START}.`)
+    return fail(`Expected ${expected.length} trades since ${WINDOW_START}.`)
   }
   return pass(
     'Window set.',
-    `${expected.length} swaps in the last 4 hours — majors like ETH and USDC dominate raw volume.`,
+    `${expected.length} DEX trades in the last 4 hours — stables and blue chips dominate raw volume.`,
   )
 }
 
@@ -53,27 +60,28 @@ export function validateExcludeMajors(sql: string, result: QueryResult): Validat
   const err = hasError(result)
   if (err) return err
   const normalized = normalizeSql(sql)
-  if (!normalized.includes('not in') && !normalized.includes('!=')) {
-    return fail('Exclude majors with NOT IN or similar filter.')
+  if (!normalized.includes('token_bought_symbol')) {
+    return fail('Filter on token_bought_symbol.')
   }
+  if (!normalized.includes('not in')) return fail('Exclude majors with NOT IN (…).')
 
   const tokenIdx = findTokenColumn(result)
-  if (tokenIdx === -1) return fail('Return the token column.')
+  if (tokenIdx === -1) return fail('Return token_bought_symbol (or alias token).')
 
   const tokens = result.rows.map((row) => String(row[tokenIdx]).toUpperCase())
   for (const excluded of EXCLUDED_TOKENS) {
     if (tokens.includes(excluded)) {
-      return fail(`${excluded} should be excluded — it's a stablecoin or blue chip.`)
+      return fail(`${excluded} should be excluded.`)
     }
   }
 
-  const expected = swapsInWindowExcludingMajors()
+  const expected = tradesInWindowExcludingMajors()
   if (result.rows.length !== expected.length) {
-    return fail(`Expected ${expected.length} altcoin swaps after exclusions.`)
+    return fail(`Expected ${expected.length} altcoin trades after exclusions.`)
   }
   return pass(
     'Majors stripped out.',
-    'USDC, USDT, BTC, ETH, XRP & SOL removed — now you can see what alts are actually moving.',
+    'USDC, USDT, BTC, ETH, XRP & SOL removed — now alt volume is visible.',
   )
 }
 
@@ -81,13 +89,13 @@ export function validateRankByVolume(sql: string, result: QueryResult): Validati
   const err = hasError(result)
   if (err) return err
   const normalized = normalizeSql(sql)
-  if (!normalized.includes('group by')) return fail('GROUP BY token to aggregate volume.')
-  if (!normalized.includes('sum')) return fail('SUM(volume_usd) to total each coin\'s volume.')
-  if (!normalized.includes('order by')) return fail('ORDER BY total volume descending.')
+  if (!normalized.includes('group by')) return fail('GROUP BY token_bought_symbol.')
+  if (!normalized.includes('sum')) return fail('SUM(amount_usd) as total_volume_usd.')
+  if (!normalized.includes('order by')) return fail('ORDER BY total_volume_usd DESC.')
 
   const tokenIdx = findTokenColumn(result)
   const volIdx = findVolumeColumn(result)
-  if (tokenIdx === -1 || volIdx === -1) return fail('Return token and total volume columns.')
+  if (tokenIdx === -1 || volIdx === -1) return fail('Return token and total_volume_usd.')
 
   const expected = topTokensByVolume(10)
   if (result.rows.length !== expected.length) {
@@ -96,12 +104,12 @@ export function validateRankByVolume(sql: string, result: QueryResult): Validati
 
   const topToken = String(result.rows[0][tokenIdx]).toUpperCase()
   if (topToken !== expected[0].token.toUpperCase()) {
-    return fail(`${expected[0].token} should be #1 by volume right now.`)
+    return fail(`${expected[0].token} should be #1 by volume.`)
   }
 
   return pass(
     'Volume ranked.',
-    `${expected[0].token} leads with $${(expected[0].total_volume_usd / 1_000_000).toFixed(2)}M — that's the heat.`,
+    `${expected[0].token} leads at $${(expected[0].total_volume_usd / 1_000_000).toFixed(2)}M — that's the rotation.`,
   )
 }
 
@@ -109,19 +117,23 @@ export function validateTopCoinsCapstone(sql: string, result: QueryResult): Vali
   const err = hasError(result)
   if (err) return err
   const normalized = normalizeSql(sql)
-  if (!normalized.includes('swapped_at')) return fail('Filter to the last 4 hours with swapped_at.')
+  if (!normalized.includes('dex.trades') && !normalized.includes('dex_trades')) {
+    return fail('Query from dex.trades.')
+  }
+  if (!normalized.includes('block_time')) return fail('Filter block_time >= TIMESTAMP …')
+  if (!normalized.includes('token_bought_symbol')) return fail('Use token_bought_symbol.')
   if (!normalized.includes('not in')) return fail('Exclude USDC, USDT, BTC, ETH, XRP, SOL.')
-  if (!normalized.includes('group by')) return fail('GROUP BY token.')
-  if (!normalized.includes('order by')) return fail('ORDER BY volume DESC.')
-  if (!normalized.includes('limit')) return fail('LIMIT your results — try top 5.')
+  if (!normalized.includes('group by')) return fail('GROUP BY token_bought_symbol.')
+  if (!normalized.includes('order by')) return fail('ORDER BY total_volume_usd DESC.')
+  if (!/limit\s+10\b/i.test(normalized)) return fail('LIMIT 10 for the top 10 coins.')
 
-  const expected = topTokensByVolume(5)
+  const expected = topTokensByVolume(CAPSTONE_LIMIT)
   const tokenIdx = findTokenColumn(result)
   const volIdx = findVolumeColumn(result)
   if (tokenIdx === -1 || volIdx === -1) return fail('Return token and total_volume_usd.')
 
   if (result.rows.length !== expected.length) {
-    return fail(`Return the top ${expected.length} coins.`)
+    return fail(`Return the top ${CAPSTONE_LIMIT} coins.`)
   }
 
   for (let i = 0; i < expected.length; i++) {
@@ -137,7 +149,7 @@ export function validateTopCoinsCapstone(sql: string, result: QueryResult): Vali
 
   const leader = expected[0]
   return pass(
-    'Top coins found!',
-    `${leader.token} is #1 at $${(leader.total_volume_usd / 1_000_000).toFixed(2)}M in 4h — this is how traders spot rotation early.`,
+    'Top 10 altcoins found!',
+    `${leader.token} is #1 at $${(leader.total_volume_usd / 1_000_000).toFixed(2)}M in 4h — production Dune query, same logic.`,
   )
 }

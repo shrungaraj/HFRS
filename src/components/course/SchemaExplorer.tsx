@@ -1,4 +1,4 @@
-import { courseTables } from '../../course/data/volumeSwaps'
+import { courseTables } from '../../course/data/dexTrades'
 import './SchemaExplorer.css'
 
 export function SchemaExplorer() {

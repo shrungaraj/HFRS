@@ -1,14 +1,23 @@
 import alasql from 'alasql'
-import { swaps } from './data/volumeSwaps'
+import { dexTrades } from './data/dexTrades'
 import type { QueryResult } from './types'
+
+const INTERNAL_TABLE = 'dex_trades'
 
 let initialized = false
 
 function ensureDatabase() {
   if (initialized) return
-  alasql('CREATE TABLE swaps')
-  alasql.tables.swaps.data = swaps.map((s) => ({ ...s }))
+  alasql(`CREATE TABLE ${INTERNAL_TABLE}`)
+  alasql.tables[INTERNAL_TABLE].data = dexTrades.map((t) => ({ ...t }))
   initialized = true
+}
+
+/** Adapt Dune-style SQL for the in-browser engine. */
+export function preprocessSql(sql: string): string {
+  return sql
+    .replace(/\bdex\.trades\b/gi, INTERNAL_TABLE)
+    .replace(/TIMESTAMP\s+'([^']+)'/gi, "'$1'")
 }
 
 function friendlySqlError(sql: string, message: string): string {
@@ -41,8 +50,10 @@ export function runQuery(sql: string): QueryResult {
     return { columns: [], rows: [], error: 'Write a SQL query first.' }
   }
 
+  const executable = preprocessSql(trimmed)
+
   try {
-    const raw = alasql(trimmed) as Record<string, unknown>[] | unknown
+    const raw = alasql(executable) as Record<string, unknown>[] | unknown
     if (!Array.isArray(raw)) {
       return { columns: ['result'], rows: [[raw]] }
     }
