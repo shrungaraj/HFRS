@@ -154,7 +154,7 @@ export function LessonPlayer() {
           )}
           {completed && (
             <button type="button" className="btn-next" onClick={handleNext}>
-              {isLastStep ? 'Finish lesson' : 'Next step →'}
+              {isLastStep ? 'Back to course →' : 'Next step →'}
             </button>
           )}
         </section>
