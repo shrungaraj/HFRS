@@ -32,5 +32,18 @@ export type CourseLesson = {
 export type Course = {
   id: string
   title: string
+  description: string
   lessons: CourseLesson[]
+}
+
+export type LearningPathCourseRef = {
+  courseId: string
+  available?: boolean
+}
+
+export type LearningPath = {
+  id: string
+  title: string
+  description: string
+  courses: LearningPathCourseRef[]
 }
