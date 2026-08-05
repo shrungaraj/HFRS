@@ -8,9 +8,17 @@ type TileProps = {
   comingSoon?: boolean
   icon?: ReactNode
   to?: string
+  actionLabel?: string
 }
 
-export function Tile({ title, description, comingSoon = false, icon, to }: TileProps) {
+export function Tile({
+  title,
+  description,
+  comingSoon = false,
+  icon,
+  to,
+  actionLabel = 'Open module',
+}: TileProps) {
   const navigate = useNavigate()
 
   function openModule() {
@@ -46,7 +54,7 @@ export function Tile({ title, description, comingSoon = false, icon, to }: TileP
       <h2 className="tile-title">{title}</h2>
       {description && <p className="tile-description">{description}</p>}
       <span className="tile-action">
-        Open module
+        {actionLabel}
         <svg viewBox="0 0 20 20" fill="none" aria-hidden="true">
           <path
             d="M7 4l6 6-6 6"

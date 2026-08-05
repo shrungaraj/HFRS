@@ -1,5 +1,6 @@
 import { Link, useParams } from 'react-router-dom'
-import { onChainDataCourse } from '../../course/data/onChainCourse'
+import { getCourseById } from '../../course/data/courses'
+import { getPathForCourse } from '../../course/data/learningPaths'
 import { Logo } from '../Logo'
 import { WalletButton } from '../WalletButton'
 import './CoursePage.css'
@@ -12,7 +13,9 @@ function lessonProgress(lessonId: string, totalSteps: number) {
 
 export function CoursePage() {
   const { courseId } = useParams()
-  const course = courseId === onChainDataCourse.id ? onChainDataCourse : null
+  const course = courseId ? getCourseById(courseId) : undefined
+  const path = courseId ? getPathForCourse(courseId) : undefined
+  const backTo = path ? `/path/${path.id}` : '/'
 
   if (!course) {
     return (
@@ -28,8 +31,8 @@ export function CoursePage() {
       <header className="course-header glass-bar">
         <div className="course-header-left">
           <Logo />
-          <Link className="course-back" to="/">
-            ← Dashboard
+          <Link className="course-back" to={backTo}>
+            ← {path ? path.title : 'Dashboard'}
           </Link>
         </div>
         <WalletButton />
@@ -38,7 +41,7 @@ export function CoursePage() {
       <main className="course-main">
         <div className="course-hero">
           <h1>{course.title}</h1>
-          <p>Dune SQL on dex.trades — same queries you'd run on dune.com</p>
+          <p>{course.description}</p>
         </div>
 
         <div className="lesson-list">

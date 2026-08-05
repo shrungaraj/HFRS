@@ -2,6 +2,7 @@ import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { CoursePage } from './components/course/CoursePage'
 import { LessonPlayer } from './components/course/LessonPlayer'
 import { Home } from './components/Home'
+import { PathPage } from './components/path/PathPage'
 import { ProtectedRoute } from './components/ProtectedRoute'
 
 function App() {
@@ -9,6 +10,14 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Home />} />
+        <Route
+          path="/path/:pathId"
+          element={
+            <ProtectedRoute>
+              <PathPage />
+            </ProtectedRoute>
+          }
+        />
         <Route
           path="/course/:courseId"
           element={

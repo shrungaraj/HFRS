@@ -17,6 +17,7 @@ const excludedList = EXCLUDED_TOKENS.map((t) => `'${t}'`).join(', ')
 export const onChainDataCourse: Course = {
   id: 'on-chain-data-analysis',
   title: 'On chain Data analysis',
+  description: 'Learn production Dune SQL on dex.trades — top altcoins by 4h volume.',
   lessons: [
     {
       id: 'lesson-1',

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
-import { onChainDataCourse } from '../../course/data/onChainCourse'
+import { getCourseById } from '../../course/data/courses'
 import { runQuery } from '../../course/sqlEngine'
 import type { QueryResult } from '../../course/types'
 import { Logo } from '../Logo'
@@ -22,9 +22,11 @@ function saveProgress(lessonId: string, step: number) {
 }
 
 export function LessonPlayer() {
-  const { lessonId } = useParams()
+  const { courseId, lessonId } = useParams()
   const navigate = useNavigate()
-  const lesson = onChainDataCourse.lessons.find((item) => item.id === lessonId)
+  const course = courseId ? getCourseById(courseId) : undefined
+  const lesson = course?.lessons.find((item) => item.id === lessonId)
+  const courseUrl = course ? `/course/${course.id}` : '/'
 
   const initialStep = useMemo(() => {
     if (!lessonId || !lesson) return 0
@@ -52,7 +54,7 @@ export function LessonPlayer() {
     return (
       <div className="lesson-player">
         <p>Lesson not available.</p>
-        <Link to={`/course/${onChainDataCourse.id}`}>Back to course</Link>
+        <Link to={courseUrl}>Back to course</Link>
       </div>
     )
   }
@@ -100,7 +102,7 @@ export function LessonPlayer() {
 
   function handleNext() {
     if (isLastStep) {
-      navigate(`/course/${onChainDataCourse.id}`)
+      navigate(courseUrl)
       return
     }
 
@@ -121,7 +123,7 @@ export function LessonPlayer() {
       <header className="lesson-header glass-bar">
         <div className="lesson-header-left">
           <Logo />
-          <Link className="lesson-back" to={`/course/${onChainDataCourse.id}`}>
+          <Link className="lesson-back" to={courseUrl}>
             ← Course
           </Link>
         </div>

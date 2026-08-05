@@ -1,10 +1,10 @@
-import { onChainDataCourse } from '../course/data/onChainCourse'
+import { learningPaths } from '../course/data/learningPaths'
 import { Logo } from './Logo'
 import { WalletButton } from './WalletButton'
 import { Tile } from './Tile'
 import './Dashboard.css'
 
-const DataAnalysisIcon = () => (
+const AnalystPathIcon = () => (
   <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
     <path
       d="M4 18V8M9 18V5M14 18v-7M19 18v-4"
@@ -46,20 +46,24 @@ export function Dashboard() {
 
       <main className="dashboard-main">
         <div className="dashboard-intro">
-          <h1>Learning Modules</h1>
-          <p>Select a module to begin your on-chain certification journey.</p>
+          <h1>Learning Paths</h1>
+          <p>Choose a path to begin your on-chain certification journey.</p>
         </div>
 
         <div className="tile-grid">
-          <Tile
-            title="On chain Data analysis"
-            description="Learn production Dune SQL on dex.trades — top altcoins by 4h volume."
-            icon={<DataAnalysisIcon />}
-            to={`/course/${onChainDataCourse.id}`}
-          />
-          <Tile title="Module 2" comingSoon icon={<PlaceholderIcon />} />
-          <Tile title="Module 3" comingSoon icon={<PlaceholderIcon />} />
-          <Tile title="Module 4" comingSoon icon={<PlaceholderIcon />} />
+          {learningPaths.map((path) => (
+            <Tile
+              key={path.id}
+              title={path.title}
+              description={path.description}
+              icon={<AnalystPathIcon />}
+              to={`/path/${path.id}`}
+              actionLabel="Start path"
+            />
+          ))}
+          <Tile title="Path 2" comingSoon icon={<PlaceholderIcon />} />
+          <Tile title="Path 3" comingSoon icon={<PlaceholderIcon />} />
+          <Tile title="Path 4" comingSoon icon={<PlaceholderIcon />} />
         </div>
       </main>
     </div>
